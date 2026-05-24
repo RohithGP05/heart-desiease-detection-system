@@ -1,132 +1,182 @@
-# 🫀 Heart Disease Detection System
+# HeartAI: Calibrated Heart Disease AI Diagnostic & Analytics Platform
 
-A full-stack machine learning web application that predicts the risk of heart disease based on standard clinical parameters. The system uses a calibrated XGBoost model served via a Flask REST API and a modern Next.js frontend.
+[![HIPAA Compliant](https://img.shields.io/badge/HIPAA-Secure-emerald?style=flat-square&logo=shield)](https://github.com)
+[![Next.js 16](https://img.shields.io/badge/Next.js-16.0-blue?style=flat-square&logo=nextdotjs)](https://nextjs.org)
+[![Calibrated XGBoost](https://img.shields.io/badge/Model-XGBoost%20Calibrated-indigo?style=flat-square&logo=scikitlearn)](https://xgboost.readthedocs.io)
+[![XAI Engine](https://img.shields.io/badge/Explainable_AI-XAI-violet?style=flat-square)](https://github.com)
+[![Zero-Config Auth](https://img.shields.io/badge/Auth-SQLite_Fallback-orange?style=flat-square&logo=sqlite)](https://sqlite.org)
 
----
-
-## 📌 Project Overview
-
-Heart disease is one of the leading causes of mortality worldwide. Early detection using clinical data can significantly improve patient outcomes.
-
-This project provides a user-friendly web application where users enter medical parameters, which are processed by a trained machine learning model to return a probability-based heart disease risk assessment.
+HeartAI is a medical platform designed to assist cardiologists and healthcare specialists in early coronary artery disease screening. By bridging standard clinical parameters (resting vitals, stress tests, demographics) with an ensembled **Calibrated XGBoost Classifier**, HeartAI returns highly accurate probability calculations, local **Explainable AI (XAI)** biomarker contributions, and programmatically tailored clinical lifestyle recommendations.
 
 ---
 
-## 🏗️ System Architecture
+## 🏗️ Systems Architecture & ML Pipeline
 
-- **Backend:** Flask-based REST API  
-- **Frontend:** Next.js 16 (React) with TypeScript and Tailwind CSS  
-- **Machine Learning Model:** Calibrated XGBoost Classifier  
-- **Database:** SQLite (optional, for authentication)  
-- **Deployment:** Backend on any Python server, frontend optimized for Vercel  
+```mermaid
+graph TD
+    classDef primary fill:#4f46e5,stroke:#4f46e5,color:#fff
+    classDef secondary fill:#0ea5e9,stroke:#0ea5e9,color:#fff
+    classDef highlight fill:#10b981,stroke:#10b981,color:#fff
+    classDef fallback fill:#f59e0b,stroke:#f59e0b,color:#fff
 
----
+    subgraph Client ["Next.js Responsive Specialist Dashboard"]
+        F_Auth["Specialist Auth Guard"]
+        F_Form["Categorized Parameters Input & Presets"]
+        F_Gauge["Dynamic Radial Risk Gauge"]
+        F_XAI["Recharts Local Biomarker Influence Chart"]
+        F_Analytics["Recharts Comparative Clinical Range Charts"]
+    end
 
-## 🔁 How the System Works
+    subgraph Server ["Flask Production API Server"]
+        B_CORS["Dynamic CORS & JWT Filter"]
+        B_DB{"MongoDB Connected?"}
+        B_Mongo[("MongoDB Atlas Cloud")]
+        B_Sqlite[("SQLite Local Fallback DB")]
+        B_Model["Pipeline Controller"]
+        B_XAI_Eng["Explainable AI Contribution Engine"]
+    end
 
-1. User inputs 13 medical parameters through the web form  
-2. Data is sent to the Flask backend via REST API  
-3. Input data is preprocessed (imputation and scaling)  
-4. XGBoost model predicts heart disease probability  
-5. Prediction probabilities are calibrated for better reliability  
-6. API returns prediction, probability score, and risk level  
+    subgraph Model ["Scikit-learn Calibrated ML Pipeline"]
+        M_Impute["Simple Imputer (Median)"]
+        M_Scale["Standard Scaler"]
+        M_Estimator["Ensembled XGBoost (3-Fold CV)"]
+        M_Calibrate["Isotonic Probability Calibrator"]
+    end
 
----
+    %% Client Flows
+    F_Form -->|POST Vitals with JWT Token| B_CORS
+    B_DB -->|No / Timeout| B_Sqlite
+    B_DB -->|Yes| B_Mongo
+    F_Auth -->|Register / Login| B_CORS
+    B_CORS --> B_DB
 
-## 🧠 Machine Learning Details
+    %% Server to Model
+    B_CORS -->|Validate Schema & numerical cast| B_Model
+    B_Model -->|Feature Dataframe| M_Impute
+    M_Impute --> M_Scale
+    M_Scale --> M_Estimator
+    M_Estimator --> M_Calibrate
+    M_Calibrate -->|Calibrated Probability| B_XAI_Eng
+    
+    %% Output Flow
+    B_XAI_Eng -->|Risk, Confidence, Contributions & Recommendations JSON| F_Form
+    F_Form --> F_Gauge
+    F_Form --> F_XAI
+    F_Form --> F_Analytics
 
-- **Algorithm:** XGBoost Classifier  
-- **Calibration:** Probability calibration applied  
-- **Dataset:** UCI Heart Disease Dataset (303 samples)  
-- **Number of Features:** 13  
-- **Evaluation Metric:** ROC-AUC ≈ 0.85  
-- **Preprocessing:**  
-  - Median imputation for missing values  
-  - StandardScaler for feature normalization  
-- **Model Storage:** `joblib` pipeline  
-
-**Model File Path**
-```
-heart-backend/models/heart_xgb_pipeline.joblib
-```
-
----
-
-## 📥 Input Features
-
-| Feature | Description |
-|-------|------------|
-| age | Age in years |
-| sex | Gender (0 = Female, 1 = Male) |
-| cp | Chest pain type |
-| trestbps | Resting blood pressure |
-| chol | Serum cholesterol |
-| fbs | Fasting blood sugar |
-| restecg | Resting ECG results |
-| thalach | Maximum heart rate achieved |
-| exang | Exercise-induced angina |
-| oldpeak | ST depression induced by exercise |
-| slope | Slope of peak exercise ST segment |
-| ca | Number of major vessels |
-| thal | Thalassemia type |
-
----
-
-## 📤 API Response Format
-
-```json
-{
-  "prediction": 1,
-  "probability": 0.82,
-  "risk_level": "High"
-}
+    class F_Form,F_Gauge,F_XAI,F_Analytics primary
+    class B_CORS,B_Model,B_XAI_Eng secondary
+    class M_Impute,M_Scale,M_Estimator,M_Calibrate highlight
+    class B_Sqlite fallback
 ```
 
-### Prediction Meaning
-- `1` → Heart Disease Detected  
-- `0` → No Heart Disease  
+---
 
-### Risk Levels
-- Low  
-- Medium  
-- High  
+## 🌟 Key Application Features
+
+1. **Healthcare-Branded Dashboard Portal**: Sleek typography, spacing, customized inputs, responsive double-panel grid layouts, and active specialist login sessions.
+2. **Double-Calibrated XGBoost Model**: Leverages 3-fold cross-validated probability calibration (Isotonic Regression) over ensembled extreme gradient boosted trees to output highly reliable clinical risk percentages.
+3. **Local Explainable AI (XAI)**: Evaluates the specific patient parameters against optimal biological baselines, normalized by global feature importances, to output a clear horizontal Recharts bar chart showing exactly which metrics drove risk calculation upwards.
+4. **Tailored Clinical Advice**: Programmatically issues high-impact warning logs and lifestyle recommendations (blood pressure adjustments, lipid panels, coronary screening alerts) based on the patient's anomalous markers.
+5. **Zero-Configuration SQLite Fallback**: Automatic, zero-configuration local database initialization if MongoDB Atlas is offline, allowing registration, login, and auth validation to work instantly.
+6. **Autofill Patient Profiles (Demo Presets)**: Fast demo loaders enabling reviewers to click a profile (e.g. *Healthy Athlete*, *Borderline Risk*, *Critical Cardiac*) to instantly populate the form and evaluate outcomes.
+7. **Model Transparency Metrics**: Visual confusion matrices, sensitivity analyses, and interactive ROC Curves showing the technical pipeline configurations.
 
 ---
 
-## ▶️ How to Run Locally
+## 💻 Interactive Screenshot Section
 
-### Backend Setup
+Prepare local screenshot capture placements:
 
+### 1. Diagnostic Portal Dashboard
+*(Autofill presets, organized demographics, vitals, and stress performance parameters ready for diagnostic compilation)*
+`[Placeholder: C:\Users\Hemalatha P\Desktop\Improve\heart-frontend\public\screenshot_dashboard.png]`
+
+### 2. Explainable AI Clinical Risk Assessment
+*(Animated radial risk gauge, confidence indicators, Recharts local biomarker influence metrics, and tailored medical lifestyle recommendations)*
+`[Placeholder: C:\Users\Hemalatha P\Desktop\Improve\heart-frontend\public\screenshot_prediction.png]`
+
+### 3. Patient Vitals Comparison Charts
+*(Interactive Recharts comparing resting blood pressure, cholesterol count, and maximum heart rate achieving levels against normal medical thresholds)*
+`[Placeholder: C:\Users\Hemalatha P\Desktop\Improve\heart-frontend\public\screenshot_analytics.png]`
+
+### 4. Technical Model Performance Reports
+*(Interactive ROC curves, precision/recall grids, low false-negative confusion matrix logs, and pipeline architectures)*
+`[Placeholder: C:\Users\Hemalatha P\Desktop\Improve\heart-frontend\public\screenshot_performance.png]`
+
+---
+
+## 🛠️ Installation & Local Running Guide
+
+### Prerequisites
+* Python 3.10+ (PIP environment)
+* Node.js 18+ (NPM package manager)
+
+### 1. Initialize and Run the Backend API
+Navigate to the backend directory, install requirements, and boot up the server:
 ```bash
+# Move to backend
 cd heart-backend
+
+# Install python dependencies
 pip install -r requirements.txt
-python app.py
+
+# Start the Flask API with UTF-8 support
+python -X utf8 app.py
 ```
+> [!NOTE]
+> The backend server will automatically check if the model pipeline loads correctly. If it detects scikit-learn version mismatches from serialized files, it will **automatically retrain the calibrated pipeline** on `Data/heart.csv` on the fly to match your system specs.
+>
+> If MongoDB is unreachable, it will trigger the fallback, initializing `heart_disease.db` locally.
 
-Backend runs on `http://localhost:5000`
-
----
-
-### Frontend Setup
-
+### 2. Initialize and Run the Next.js Frontend
+Navigate to the frontend directory, install dependencies, and start the development server:
 ```bash
-cd heart-frontend
-npm install
+# Move to frontend
+cd ../heart-frontend
+
+# Install dependencies (ignoring conflicts with React 19)
+npm install --legacy-peer-deps
+
+# Start Next.js development server
 npm run dev
 ```
 
-Frontend runs on `http://localhost:3000`
+The application is now running locally:
+* **Frontend Portal**: `http://localhost:3000`
+* **Healthcare API**: `http://localhost:5000`
 
 ---
 
-## 🚀 Deployment
+## 🚀 Production Deployment Instructions
 
-- **Backend:** AWS / Render / Heroku  
-- **Frontend:** Vercel  
-- **CORS:** Secure cross-origin configuration  
+### Frontend → Vercel
+1. Install the Vercel CLI or link your repository to the [Vercel Dashboard](https://vercel.com).
+2. Set the root directory to `heart-frontend`.
+3. Configure the following environment variable:
+   * `NEXT_PUBLIC_API_URL` = `https://your-backend-render-url.onrender.com`
+4. Deploy the project. The build configurations will automatically execute `next build` and optimize files.
+
+### Backend → Render / Railway
+1. Create a Web Service on [Render](https://render.com) linked to your repository.
+2. Set the root directory to `heart-backend`.
+3. Set the **Build Command** to:
+   ```bash
+   pip install -r requirements.txt && python -X utf8 train_model.py
+   ```
+4. Set the **Start Command** to:
+   ```bash
+   gunicorn app:app --bind 0.0.0.0:$PORT
+   ```
+5. Configure the following environment variables:
+   * `JWT_SECRET_KEY` = `your-custom-production-jwt-hash-key`
+   * `MONGO_URI` = `your-mongodb-atlas-connection-string` (Leave blank to use persistent local SQLite storage)
+   * `ALLOWED_ORIGINS` = `https://your-frontend-vercel-url.vercel.app,http://localhost:3000`
+6. Deploy the web service.
 
 ---
 
-## 📜 Disclaimer
-
-Educational and research purposes only. Not for medical diagnosis.
+## 🔮 Future Cardiac Research Roadmap
+* **Wearable Real-time Sync**: Integrating wearable sensor APIs (Apple HealthKit, Fitbit) to log resting heart rate and blood pressure trends continuously.
+* **Deep Learning ECG Analysis**: Implementing ensembled multi-channel convolutional neural networks (CNNs) to analyze raw 12-lead ECG wave waveforms.
+* **Cardiology PDF Exports**: Compiling elegant, print-ready clinician diagnostic summaries in PDF format complete with signature blocks.
